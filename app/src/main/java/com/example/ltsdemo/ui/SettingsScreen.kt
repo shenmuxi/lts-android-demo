@@ -1,5 +1,6 @@
 package com.example.ltsdemo.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -28,7 +29,7 @@ fun SettingsScreen() {
     var cacheThreshold by remember(currentConfig) { mutableStateOf(currentConfig.cacheThreshold.toString()) }
     var timeInterval by remember(currentConfig) { mutableStateOf(currentConfig.timeInterval.toString()) }
     
-    // We only handle the first instance for simplicity in this UI, but we could expand
+    // We only handle the first instance for simplicity in this UI
     var groupId by remember(currentConfig) { mutableStateOf(currentConfig.instances.firstOrNull()?.groupId ?: "") }
     var streamId by remember(currentConfig) { mutableStateOf(currentConfig.instances.firstOrNull()?.streamId ?: "") }
 
@@ -98,34 +99,38 @@ fun SettingsScreen() {
                 ConfigManager.saveConfig(context, newConfig)
                 
                 // SDK Initialization
-                LtsManager.initialize(
-                    context.applicationContext as android.app.Application,
-                    newConfig.region,
-                    newConfig.projectId,
-                    newConfig.instances.firstOrNull()?.groupId ?: "",
-                    newConfig.instances.firstOrNull()?.streamId ?: "",
-                    newConfig.ak,
-                    newConfig.sk,
-                    newConfig.cacheThreshold,
-                    newConfig.timeInterval
-                )
+                try {
+                    LtsManager.initialize(
+                        context.applicationContext as android.app.Application,
+                        newConfig.region,
+                        newConfig.projectId,
+                        newConfig.instances.firstOrNull()?.groupId ?: "",
+                        newConfig.instances.firstOrNull()?.streamId ?: "",
+                        newConfig.ak,
+                        newConfig.sk,
+                        newConfig.cacheThreshold,
+                        newConfig.timeInterval
+                    )
+                    val toast = Toast.makeText(context, "配置已保存，SDK 初始化成功", Toast.LENGTH_SHORT)
+                    toast.setGravity(android.view.Gravity.CENTER, 0, 0)
+                    toast.show()
+                } catch (e: Exception) {
+                    val toast = Toast.makeText(context, "SDK 初始化失败: ${e.message}", Toast.LENGTH_LONG)
+                    toast.setGravity(android.view.Gravity.CENTER, 0, 0)
+                    toast.show()
+                }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("保存并初始化 SDK")
         }
-        
-        if (LtsManager.isInitialized()) {
-            Text("SDK 状态: 已初始化", color = MaterialTheme.colorScheme.primary)
-        } else {
-            Text("SDK 状态: 未初始化", color = MaterialTheme.colorScheme.error)
-        }
     }
     
-    // Auto-init on startup if saved config exists
+    // Auto-init on startup handled in LtsManager or elsewhere if needed, 
+    // but keep LaunchedEffect if we want to ensure it runs when this screen first appears
     LaunchedEffect(Unit) {
         val saved = ConfigManager.loadSavedConfig(context)
-        if (saved != null) {
+        if (saved != null && !LtsManager.isInitialized()) {
             LtsManager.initialize(
                 context.applicationContext as android.app.Application,
                 saved.region,

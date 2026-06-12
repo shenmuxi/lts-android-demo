@@ -29,7 +29,7 @@ fun LogTestScreen() {
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text("日志标题与内容", style = MaterialTheme.typography.titleLarge)
+        Text("编辑标签与内容", style = MaterialTheme.typography.titleLarge)
 
         // 1. Labels and Content Display Windows
         Row(modifier = Modifier.fillMaxWidth().height(150.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
