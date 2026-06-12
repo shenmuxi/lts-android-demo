@@ -1,0 +1,44 @@
+[
+    {
+        "title": "测试-203",
+        "region": "cn-north-7",
+        "project-id": "wwww",
+        "ak": "xxxx_203_ak",
+        "sk": "xxxx_203_sk",
+        "cache-threshold": 200,
+        "time-interval": 3,
+        "IsReportBackground": true,
+        "IsReportLaunch": false,
+        "instances": [
+            {
+                "group-id": "g1_203",
+                "stream-id": "s1_203"
+            },
+            {
+                "group-id": "g2_203",
+                "stream-id": "s2_203"
+            }
+        ]
+    },
+    {
+        "title": "现网-北京四",
+        "region": "cn-north-4",
+        "project-id": "xxxx_bj4_project",
+        "ak": "xxxx_bj4_ak",
+        "sk": "xxxx_bj4_sk",
+        "cache-threshold": 200,
+        "time-interval": 3,
+        "IsReportBackground": true,
+        "IsReportLaunch": false,
+        "instances": [
+            {
+                "group-id": "g1_bj4",
+                "stream-id": "s1_bj4"
+            },
+            {
+                "group-id": "g2_bj4",
+                "stream-id": "s2_bj4"
+            }
+        ]
+    }
+]
