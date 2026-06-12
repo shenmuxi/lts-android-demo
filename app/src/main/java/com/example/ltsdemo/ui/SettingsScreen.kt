@@ -8,32 +8,34 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.ltsdemo.*
 
 @Composable
 fun SettingsScreen() {
     val context = LocalContext.current
-    val predefinedConfigs = remember { ConfigManager.loadPredefinedConfigs(context) }
+    var predefinedConfigs by remember { mutableStateOf<List<LtsFullConfig>>(emptyList()) }
     
     // Initial Load
     var currentConfig by remember { 
-        mutableStateOf(ConfigManager.loadSavedConfig(context) ?: predefinedConfigs.firstOrNull() ?: LtsFullConfig()) 
+        mutableStateOf(ConfigManager.loadSavedConfig(context) ?: LtsFullConfig()) 
     }
 
-    // Editable state derived from currentConfig
+    // Editable state
+    var host by remember(currentConfig) { mutableStateOf(currentConfig.host) }
     var region by remember(currentConfig) { mutableStateOf(currentConfig.region) }
     var projectId by remember(currentConfig) { mutableStateOf(currentConfig.projectId) }
     var ak by remember(currentConfig) { mutableStateOf(currentConfig.ak) }
     var sk by remember(currentConfig) { mutableStateOf(currentConfig.sk) }
     var cacheThreshold by remember(currentConfig) { mutableStateOf(currentConfig.cacheThreshold.toString()) }
     var timeInterval by remember(currentConfig) { mutableStateOf(currentConfig.timeInterval.toString()) }
-    
-    // We only handle the first instance for simplicity in this UI
     var groupId by remember(currentConfig) { mutableStateOf(currentConfig.instances.firstOrNull()?.groupId ?: "") }
     var streamId by remember(currentConfig) { mutableStateOf(currentConfig.instances.firstOrNull()?.streamId ?: "") }
 
     var showConfigList by remember { mutableStateOf(false) }
+    var showPasswordDialog by remember { mutableStateOf(false) }
+    var password by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -44,15 +46,49 @@ fun SettingsScreen() {
     ) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text("LTS SDK 配置", style = MaterialTheme.typography.titleLarge)
-            Button(onClick = { showConfigList = true }) {
-                Text("选择预设配置")
+            Button(onClick = { showPasswordDialog = true }) {
+                Text("加载加密配置")
             }
         }
         
+        // Password Dialog
+        if (showPasswordDialog) {
+            AlertDialog(
+                onDismissRequest = { showPasswordDialog = false },
+                title = { Text("解密密码") },
+                text = {
+                    OutlinedTextField(
+                        value = password,
+                        onValueChange = { password = it },
+                        label = { Text("输入密码") },
+                        visualTransformation = PasswordVisualTransformation(),
+                        singleLine = true
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        try {
+                            predefinedConfigs = ConfigManager.loadDecryptedConfigs(context, password)
+                            showPasswordDialog = false
+                            showConfigList = true
+                        } catch (e: Exception) {
+                            val toast = Toast.makeText(context, "解密失败: 请检查密码", Toast.LENGTH_SHORT)
+                            toast.setGravity(android.view.Gravity.CENTER, 0, 0)
+                            toast.show()
+                        }
+                    }) { Text("解密") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showPasswordDialog = false }) { Text("取消") }
+                }
+            )
+        }
+        
+        // Config Selection Dialog
         if (showConfigList) {
             AlertDialog(
                 onDismissRequest = { showConfigList = false },
-                title = { Text("选择配置") },
+                title = { Text("选择预设配置") },
                 text = {
                     Column {
                         predefinedConfigs.forEach { config ->
@@ -74,6 +110,7 @@ fun SettingsScreen() {
             )
         }
 
+        OutlinedTextField(value = host, onValueChange = { host = it }, label = { Text("Host") }, modifier = Modifier.fillMaxWidth())
         OutlinedTextField(value = region, onValueChange = { region = it }, label = { Text("区域 (Region)") }, modifier = Modifier.fillMaxWidth())
         OutlinedTextField(value = projectId, onValueChange = { projectId = it }, label = { Text("项目 ID (Project ID)") }, modifier = Modifier.fillMaxWidth())
         OutlinedTextField(value = groupId, onValueChange = { groupId = it }, label = { Text("日志组 ID (Log Group ID)") }, modifier = Modifier.fillMaxWidth())
@@ -86,7 +123,8 @@ fun SettingsScreen() {
         Button(
             onClick = {
                 val newConfig = LtsFullConfig(
-                    title = "Modified",
+                    title = currentConfig.title,
+                    host = host,
                     region = region,
                     projectId = projectId,
                     ak = ak,
@@ -102,6 +140,7 @@ fun SettingsScreen() {
                 try {
                     LtsManager.initialize(
                         context.applicationContext as android.app.Application,
+                        newConfig.host,
                         newConfig.region,
                         newConfig.projectId,
                         newConfig.instances.firstOrNull()?.groupId ?: "",
@@ -126,13 +165,13 @@ fun SettingsScreen() {
         }
     }
     
-    // Auto-init on startup handled in LtsManager or elsewhere if needed, 
-    // but keep LaunchedEffect if we want to ensure it runs when this screen first appears
+    // Auto-init on startup
     LaunchedEffect(Unit) {
         val saved = ConfigManager.loadSavedConfig(context)
         if (saved != null && !LtsManager.isInitialized()) {
             LtsManager.initialize(
                 context.applicationContext as android.app.Application,
+                saved.host,
                 saved.region,
                 saved.projectId,
                 saved.instances.firstOrNull()?.groupId ?: "",

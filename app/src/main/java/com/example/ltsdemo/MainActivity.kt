@@ -17,6 +17,24 @@ import com.example.ltsdemo.ui.theme.LTSDemoTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Auto-initialize LTS SDK if saved config exists
+        val savedConfig = ConfigManager.loadSavedConfig(this)
+        if (savedConfig != null) {
+            LtsManager.initialize(
+                this.application,
+                savedConfig.host,
+                savedConfig.region,
+                savedConfig.projectId,
+                savedConfig.instances.firstOrNull()?.groupId ?: "",
+                savedConfig.instances.firstOrNull()?.streamId ?: "",
+                savedConfig.ak,
+                savedConfig.sk,
+                savedConfig.cacheThreshold,
+                savedConfig.timeInterval
+            )
+        }
+
         enableEdgeToEdge()
         setContent {
             LTSDemoTheme {

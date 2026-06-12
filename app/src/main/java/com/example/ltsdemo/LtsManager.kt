@@ -3,6 +3,7 @@ package com.example.ltsdemo
 import android.app.Application
 import com.cloud.lts.LTSSDK
 import com.cloud.lts.UserConfig
+import com.cloud.lts.util.log.LogLevel
 import java.util.HashMap
 
 object LtsManager {
@@ -10,6 +11,7 @@ object LtsManager {
 
     fun initialize(
         application: Application,
+        host: String,
         region: String,
         projectId: String,
         groupId: String,
@@ -19,7 +21,7 @@ object LtsManager {
         cacheThreshold: Int = 200,
         timeInterval: Int = 3
     ) {
-        val userConfig = UserConfig.Builder()
+        val builder = UserConfig.Builder()
             .setRegion(region)
             .setProjectId(projectId)
             .setGroupId(groupId)
@@ -29,18 +31,15 @@ object LtsManager {
             .setCacheThreshold(cacheThreshold.toLong())
             .setTimeInterval(timeInterval.toLong())
             .setIsReportBackground(true)
-            .build()
-
-        ltsSdk = LTSSDK(application, userConfig)
-        // Attempting to set log level using the most common package/class structure for 1.0.28
-        try {
-            val logLevelClass = Class.forName("com.cloud.lts.utils.LTSLogLevel")
-            val debugField = logLevelClass.getField("DEBUG")
-            val setLogLevelMethod = LTSSDK::class.java.getMethod("setLogLevel", logLevelClass)
-            setLogLevelMethod.invoke(ltsSdk, debugField.get(null))
-        } catch (e: Exception) {
-            e.printStackTrace()
+        
+        if (host.isNotBlank()) {
+            builder.setUrlHost(host)
         }
+        
+        val userConfig = builder.build()
+
+        LTSSDK.setLogLevel(LogLevel.DEBUG)
+        ltsSdk = LTSSDK(application, userConfig)
     }
 
     fun report(labels: Map<String, Any>, contents: Any) {

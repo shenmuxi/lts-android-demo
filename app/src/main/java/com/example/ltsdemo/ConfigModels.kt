@@ -9,6 +9,7 @@ data class LtsInstance(
 
 data class LtsFullConfig(
     @SerializedName("title") val title: String = "Custom",
+    @SerializedName("host") val host: String = "",
     @SerializedName("region") val region: String = "cn-north-4",
     @SerializedName("project-id") val projectId: String = "",
     @SerializedName("ak") val ak: String = "",

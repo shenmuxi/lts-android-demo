@@ -6,19 +6,18 @@ import com.google.gson.reflect.TypeToken
 import java.io.File
 
 object ConfigManager {
-    private const val PREFS_NAME = "lts_prefs"
-    private const val CONFIG_KEY = "current_config"
-    private const val ASSET_FILE = "configs.json"
+    private const val ENCRYPTED_ASSET_FILE = "configs_encrypted.json"
     private const val PERSIST_FILE = "user_config.json"
     private val gson = Gson()
 
-    fun loadPredefinedConfigs(context: Context): List<LtsFullConfig> {
+    fun loadDecryptedConfigs(context: Context, password: String): List<LtsFullConfig> {
         return try {
-            val json = context.assets.open(ASSET_FILE).bufferedReader().use { it.readText() }
+            val encryptedBase64 = context.assets.open(ENCRYPTED_ASSET_FILE).bufferedReader().use { it.readText() }
+            val decryptedJson = CryptoUtils.decrypt(encryptedBase64, password)
             val listType = object : TypeToken<List<LtsFullConfig>>() {}.type
-            gson.fromJson(json, listType)
+            gson.fromJson(decryptedJson, listType)
         } catch (e: Exception) {
-            emptyList()
+            throw e
         }
     }
 
