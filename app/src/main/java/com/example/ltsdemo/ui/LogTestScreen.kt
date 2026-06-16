@@ -107,8 +107,8 @@ fun LogTestScreen() {
                 label = { Text("键 (Key)") }, 
                 modifier = Modifier.weight(1f).height(90.dp), // Fixed height
                 supportingText = { Text("${inputKey.length}/100") }, // Char count
-                singleLine = false,
-                maxLines = 2
+                singleLine = true,
+                maxLines = 1
             )
             OutlinedTextField(
                 value = inputValue, 
@@ -116,8 +116,8 @@ fun LogTestScreen() {
                 label = { Text("值 (Value)") }, 
                 modifier = Modifier.weight(1f).height(90.dp), // Fixed height
                 supportingText = { Text("${inputValue.length}/100") }, // Char count
-                singleLine = false,
-                maxLines = 2
+                singleLine = true,
+                maxLines = 1
             )
         }
 

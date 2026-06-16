@@ -40,14 +40,14 @@ fun ConcurrentTestScreen() {
             value = threadCount,
             onValueChange = { threadCount = it },
             label = { Text("并发线程数") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().height(64.dp)
         )
 
         OutlinedTextField(
             value = logCountPerThread,
             onValueChange = { logCountPerThread = it },
             label = { Text("每线程发送日志数") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().height(64.dp)
         )
 
         Button(

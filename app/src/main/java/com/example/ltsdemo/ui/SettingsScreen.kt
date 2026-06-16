@@ -104,15 +104,15 @@ fun SettingsScreen() {
             )
         }
 
-        OutlinedTextField(value = host, onValueChange = { host = it }, label = { Text("Host") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(value = region, onValueChange = { region = it }, label = { Text("区域 (Region)") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(value = projectId, onValueChange = { projectId = it }, label = { Text("项目 ID (Project ID)") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(value = groupId, onValueChange = { groupId = it }, label = { Text("日志组 ID (Log Group ID)") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(value = streamId, onValueChange = { streamId = it }, label = { Text("日志流 ID (Log Stream ID)") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(value = ak, onValueChange = { ak = it }, label = { Text("Access Key (AK)") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(value = sk, onValueChange = { sk = it }, label = { Text("Secret Key (SK)") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(value = cacheThreshold, onValueChange = { cacheThreshold = it }, label = { Text("缓存阈值 (条数)") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(value = timeInterval, onValueChange = { timeInterval = it }, label = { Text("上报间隔 (秒)") }, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(value = host, onValueChange = { host = it }, label = { Text("Host") }, modifier = Modifier.fillMaxWidth().height(64.dp))
+        OutlinedTextField(value = region, onValueChange = { region = it }, label = { Text("区域 (Region)") }, modifier = Modifier.fillMaxWidth().height(64.dp))
+        OutlinedTextField(value = projectId, onValueChange = { projectId = it }, label = { Text("项目 ID (Project ID)") }, modifier = Modifier.fillMaxWidth().height(64.dp))
+        OutlinedTextField(value = groupId, onValueChange = { groupId = it }, label = { Text("日志组 ID (Log Group ID)") }, modifier = Modifier.fillMaxWidth().height(64.dp))
+        OutlinedTextField(value = streamId, onValueChange = { streamId = it }, label = { Text("日志流 ID (Log Stream ID)") }, modifier = Modifier.fillMaxWidth().height(64.dp))
+        OutlinedTextField(value = ak, onValueChange = { ak = it }, label = { Text("Access Key (AK)") }, modifier = Modifier.fillMaxWidth().height(64.dp))
+        OutlinedTextField(value = sk, onValueChange = { sk = it }, label = { Text("Secret Key (SK)") }, modifier = Modifier.fillMaxWidth().height(64.dp))
+        OutlinedTextField(value = cacheThreshold, onValueChange = { cacheThreshold = it }, label = { Text("缓存阈值 (条数)") }, modifier = Modifier.fillMaxWidth().height(64.dp))
+        OutlinedTextField(value = timeInterval, onValueChange = { timeInterval = it }, label = { Text("上报间隔 (秒)") }, modifier = Modifier.fillMaxWidth().height(64.dp))
 
         Button(
             onClick = {

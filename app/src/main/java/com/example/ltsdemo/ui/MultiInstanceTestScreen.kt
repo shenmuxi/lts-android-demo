@@ -97,14 +97,14 @@ fun MultiInstanceTestScreen() {
                 value = reportCount,
                 onValueChange = { reportCount = it },
                 label = { Text("每实例发送量") },
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).height(64.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
             OutlinedTextField(
                 value = threadCount,
                 onValueChange = { threadCount = it },
                 label = { Text("线程数") },
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).height(64.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
         }
