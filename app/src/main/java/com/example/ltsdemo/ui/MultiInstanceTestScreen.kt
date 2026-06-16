@@ -45,7 +45,8 @@ fun MultiInstanceTestScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp)
+            .windowInsetsPadding(WindowInsets.ime),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text("多实例并发上报", style = MaterialTheme.typography.titleLarge)

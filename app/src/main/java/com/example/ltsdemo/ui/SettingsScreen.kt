@@ -40,6 +40,7 @@ fun SettingsScreen() {
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
+            .windowInsetsPadding(WindowInsets.ime)
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {

@@ -29,6 +29,7 @@ fun ConcurrentTestScreen() {
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
+            .windowInsetsPadding(WindowInsets.ime)
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
