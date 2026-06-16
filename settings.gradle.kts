@@ -9,7 +9,7 @@ pluginManagement {
         }
         mavenCentral()
         gradlePluginPortal()
-        maven("https://maven.aliyun.com/repository/public")
+//        maven("https://mirrors.tools.huawei.com/maven")
     }
 }
 dependencyResolutionManagement {
@@ -17,10 +17,13 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven("https://maven.aliyun.com/repository/public")
+//        maven("https://mirrors.tools.huawei.com/maven")
     }
 
 }
 
 rootProject.name = "LTSDemo"
 include(":app")
+
+//include(":lts-android-sdk")
+//project(":lts-android-sdk").projectDir=file("../android-sdk-lts/LTS/lts-android-sdk")
