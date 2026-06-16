@@ -43,6 +43,8 @@ dependencies {
     implementation("io.github.lts-sdk:lts-sdk-android:1.0.28")
 //    implementation(project(":lts-android-sdk"))
     implementation("com.google.code.gson:gson:2.8.9")
+    implementation("androidx.room:room-runtime:2.4.0")
+    implementation("androidx.room:room-common:2.4.0")
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
