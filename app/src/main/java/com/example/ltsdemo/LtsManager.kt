@@ -139,7 +139,7 @@ object LtsManager {
         }
     }
     
-    fun isInitialized(): Boolean = ltsSdk != null || multiSdkInstances.isNotEmpty()
+    fun isInitialized(): Boolean = ltsSdk != null && ltsSdk!!.isInitialized
     
     fun getMultiInstanceCount(): Int = multiSdkInstances.size
 }

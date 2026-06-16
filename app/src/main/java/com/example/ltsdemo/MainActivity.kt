@@ -2,6 +2,7 @@ package com.example.ltsdemo
 
 import android.graphics.Color
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
@@ -59,6 +60,7 @@ class MainActivity : ComponentActivity() {
 fun MainContainer() {
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("单条上报", "批量上报", "多实例上报", "配置详情")
+    var showInitToast by remember { mutableStateOf(!LtsManager.isInitialized()) }
 
     Scaffold(
         // Removed TopAppBar as per request
@@ -102,6 +104,30 @@ fun MainContainer() {
                 }
             }
             FloatingLogCount()
+
+            if (showInitToast) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                        shape = MaterialTheme.shapes.medium,
+                        shadowElevation = 8.dp
+                    ) {
+                        Text(
+                            text = "前往配置页面\n进行SDK初始化",
+                            modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
+                            color = MaterialTheme.colorScheme.surface,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                }
+                LaunchedEffect(Unit) {
+                    delay(3000)
+                    showInitToast = false
+                }
+            }
         }
     }
 }
@@ -139,7 +165,7 @@ fun FloatingLogCount() {
             shadowElevation = 4.dp
         ) {
             Text(
-                text = "DB Logs: $logCount",
+                text = "DB: $logCount",
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onPrimaryContainer

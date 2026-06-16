@@ -8,9 +8,9 @@ data class LtsInstance(
 )
 
 data class LtsFullConfig(
-    @SerializedName("title") val title: String = "Custom",
+    @SerializedName("title") val title: String = "",
     @SerializedName("host") val host: String = "",
-    @SerializedName("region") val region: String = "cn-north-4",
+    @SerializedName("region") val region: String = "",
     @SerializedName("project-id") val projectId: String = "",
     @SerializedName("ak") val ak: String = "",
     @SerializedName("sk") val sk: String = "",

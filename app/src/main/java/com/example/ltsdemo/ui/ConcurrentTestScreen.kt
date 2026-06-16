@@ -62,8 +62,8 @@ fun ConcurrentTestScreen() {
                             repeat(logs) { lId ->
                                 val randomContent = generateRandomString(100)
                                 LtsManager.report(
-                                    mapOf("thread_id" to tId, "log_index" to lId),
-                                    "并发测试随机内容: $randomContent"
+                                    mapOf("thread_id" to tId),
+                                    "并发测试随机内容($lId): $randomContent"
                                 )
                                 withContext(Dispatchers.Main) {
                                     progress++
