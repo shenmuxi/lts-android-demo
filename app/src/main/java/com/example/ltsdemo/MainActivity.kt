@@ -8,11 +8,17 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import com.example.ltsdemo.ui.LogTestScreen
 import com.example.ltsdemo.ui.SettingsScreen
 import com.example.ltsdemo.ui.ConcurrentTestScreen
+import com.example.ltsdemo.ui.MultiInstanceTestScreen
 import com.example.ltsdemo.ui.theme.LTSDemoTheme
+import com.cloud.lts.database.DatabaseUtil
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,7 +54,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainContainer() {
     var selectedTab by remember { mutableIntStateOf(0) }
-    val tabs = listOf("单条上报", "批量上报", "配置详情")
+    val tabs = listOf("单条上报", "批量上报", "多实例上报", "配置详情")
 
     Scaffold(
         // Removed TopAppBar as per request
@@ -82,12 +88,58 @@ fun MainContainer() {
             }
         }
     ) { innerPadding ->
-        Surface(modifier = Modifier.padding(innerPadding)) {
-            when (selectedTab) {
-                0 -> LogTestScreen()
-                1 -> ConcurrentTestScreen()
-                2 -> SettingsScreen()
+        Box(modifier = Modifier.padding(innerPadding)) {
+            Surface(modifier = Modifier.fillMaxSize()) {
+                when (selectedTab) {
+                    0 -> LogTestScreen()
+                    1 -> ConcurrentTestScreen()
+                    2 -> MultiInstanceTestScreen()
+                    3 -> SettingsScreen()
+                }
             }
+            FloatingLogCount()
+        }
+    }
+}
+
+@Composable
+fun FloatingLogCount() {
+    var logCount by remember { mutableLongStateOf(0L) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            try {
+                if (DatabaseUtil.isInitDatabaseComplete) {
+                    val count = withContext(Dispatchers.IO) {
+                        DatabaseUtil.dataDao.getAllCount()
+                    }
+                    logCount = count
+                }
+            } catch (e: Exception) {
+                // Ignore errors
+                delay(1)
+            }
+            delay(2000)
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.TopEnd
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
+            shape = MaterialTheme.shapes.medium,
+            shadowElevation = 4.dp
+        ) {
+            Text(
+                text = "DB Logs: $logCount",
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
         }
     }
 }

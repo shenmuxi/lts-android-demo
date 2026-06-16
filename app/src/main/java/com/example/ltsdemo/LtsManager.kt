@@ -8,6 +8,7 @@ import java.util.HashMap
 
 object LtsManager {
     private var ltsSdk: LTSSDK? = null
+    private val multiSdkInstances = mutableListOf<LTSSDK>()
 
     fun initialize(
         application: Application,
@@ -40,6 +41,38 @@ object LtsManager {
 
         LTSSDK.setLogLevel(LogLevel.DEBUG)
         ltsSdk = LTSSDK(application, userConfig)
+        
+        // Also add to multi-instances for consistency
+        multiSdkInstances.clear()
+        ltsSdk?.let { multiSdkInstances.add(it) }
+    }
+
+    fun initializeMulti(application: Application, config: LtsFullConfig) {
+        LTSSDK.setLogLevel(LogLevel.DEBUG)
+        multiSdkInstances.clear()
+        
+        config.instances.forEach { instance ->
+            val builder = UserConfig.Builder()
+                .setRegion(config.region)
+                .setProjectId(config.projectId)
+                .setGroupId(instance.groupId)
+                .setStreamId(instance.streamId)
+                .setAccessKey(config.ak)
+                .setSecretKey(config.sk)
+                .setCacheThreshold(config.cacheThreshold.toLong())
+                .setTimeInterval(config.timeInterval.toLong())
+                .setIsReportBackground(config.isReportBackground)
+            
+            if (config.host.isNotBlank()) {
+                builder.setUrlHost(config.host)
+            }
+            
+            val userConfig = builder.build()
+            multiSdkInstances.add(LTSSDK(application, userConfig))
+        }
+        
+        // Update default ltsSdk to the first one if available
+        ltsSdk = multiSdkInstances.firstOrNull()
     }
 
     fun report(labels: Map<String, Any>, contents: Any) {
@@ -71,6 +104,42 @@ object LtsManager {
             else -> ltsSdk?.reportImmediately(contents.toString(), labelMap)
         }
     }
+
+    fun reportMulti(labels: Map<String, Any>, contents: Any) {
+        val labelMap = HashMap<String, Any>()
+        labelMap.putAll(labels)
+
+        multiSdkInstances.forEach { sdk ->
+            when (contents) {
+                is String -> sdk.report(contents, labelMap)
+                is Map<*, *> -> {
+                    val contentMap = HashMap<String, Any?>()
+                    contents.forEach { (k, v) -> contentMap[k.toString()] = v }
+                    sdk.report(contentMap, labelMap)
+                }
+                else -> sdk.report(contents.toString(), labelMap)
+            }
+        }
+    }
+
+    fun reportMultiImmediately(labels: Map<String, Any>, contents: Any) {
+        val labelMap = HashMap<String, Any>()
+        labelMap.putAll(labels)
+
+        multiSdkInstances.forEach { sdk ->
+            when (contents) {
+                is String -> sdk.reportImmediately(contents, labelMap)
+                is Map<*, *> -> {
+                    val contentMap = HashMap<String, Any?>()
+                    contents.forEach { (k, v) -> contentMap[k.toString()] = v }
+                    sdk.reportImmediately(contentMap, labelMap)
+                }
+                else -> sdk.reportImmediately(contents.toString(), labelMap)
+            }
+        }
+    }
     
-    fun isInitialized(): Boolean = ltsSdk != null
+    fun isInitialized(): Boolean = ltsSdk != null || multiSdkInstances.isNotEmpty()
+    
+    fun getMultiInstanceCount(): Int = multiSdkInstances.size
 }

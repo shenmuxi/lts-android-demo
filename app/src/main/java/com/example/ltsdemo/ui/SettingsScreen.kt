@@ -8,7 +8,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.ltsdemo.*
 
@@ -44,12 +43,7 @@ fun SettingsScreen() {
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("LTS SDK 配置", style = MaterialTheme.typography.titleLarge)
-            Button(onClick = { showPasswordDialog = true }) {
-                Text("加载加密配置")
-            }
-        }
+        Text("LTS SDK 配置", style = MaterialTheme.typography.titleLarge)
         
         // Password Dialog
         if (showPasswordDialog) {
@@ -61,7 +55,6 @@ fun SettingsScreen() {
                         value = password,
                         onValueChange = { password = it },
                         label = { Text("输入密码") },
-                        visualTransformation = PasswordVisualTransformation(),
                         singleLine = true
                     )
                 },
@@ -162,6 +155,13 @@ fun SettingsScreen() {
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("保存并初始化 SDK")
+        }
+
+        OutlinedButton(
+            onClick = { showPasswordDialog = true },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("加载预配置")
         }
     }
     
