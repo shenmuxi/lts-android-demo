@@ -9,6 +9,7 @@ pluginManagement {
         }
         mavenCentral()
         gradlePluginPortal()
+        maven("https://maven.aliyun.com/repository/public")
     }
 }
 plugins {
@@ -19,7 +20,9 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven("https://maven.aliyun.com/repository/public")
     }
+
 }
 
 rootProject.name = "LTSDemo"

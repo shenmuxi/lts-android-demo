@@ -83,7 +83,7 @@ fun MultiInstanceTestScreen() {
                             Text("实例 #$index", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
                             Text("Group: ${instance.groupId}", style = MaterialTheme.typography.bodySmall)
                             Text("Stream: ${instance.streamId}", style = MaterialTheme.typography.bodySmall)
-                            HorizontalDivider()
+                            Divider()
                         }
                     }
                 }
@@ -109,7 +109,7 @@ fun MultiInstanceTestScreen() {
         }
 
         if (isReporting) {
-            LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth())
+            LinearProgressIndicator(progress = progress, modifier = Modifier.fillMaxWidth())
         }
 
         Button(

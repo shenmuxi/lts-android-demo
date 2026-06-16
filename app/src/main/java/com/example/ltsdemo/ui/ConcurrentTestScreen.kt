@@ -17,7 +17,7 @@ fun ConcurrentTestScreen() {
     var threadCount by remember { mutableStateOf("5") }
     var logCountPerThread by remember { mutableStateOf("10") }
     var isRunning by remember { mutableStateOf(false) }
-    var progress by remember { mutableIntStateOf(0) }
+    var progress by remember { mutableStateOf(0) }
     
     // Timed Test State
     var intervalSeconds by remember { mutableStateOf("5") }
@@ -85,7 +85,7 @@ fun ConcurrentTestScreen() {
 
         if (isRunning) {
             LinearProgressIndicator(
-                progress = { progress.toFloat() / ((threadCount.toIntOrNull() ?: 1) * (logCountPerThread.toIntOrNull() ?: 1)) },
+                progress = progress.toFloat() / ((threadCount.toIntOrNull() ?: 1) * (logCountPerThread.toIntOrNull() ?: 1)),
                 modifier = Modifier.fillMaxWidth(),
             )
         }

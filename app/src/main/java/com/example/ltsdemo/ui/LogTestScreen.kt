@@ -56,7 +56,7 @@ fun LogTestScreen() {
                             }
                         }
                     }
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                    Divider(modifier = Modifier.padding(vertical = 4.dp))
                     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                         labelsMap.forEach { (k, v) ->
                             Text("$k: $v", style = MaterialTheme.typography.bodySmall)
@@ -88,7 +88,7 @@ fun LogTestScreen() {
                             }
                         }
                     }
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                    Divider(modifier = Modifier.padding(vertical = 4.dp))
                     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                         contentMap.forEach { (k, v) ->
                             Text("$k: $v", style = MaterialTheme.typography.bodySmall)

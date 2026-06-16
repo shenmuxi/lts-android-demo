@@ -1,9 +1,10 @@
 package com.example.ltsdemo
 
+import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
+import androidx.core.view.WindowCompat
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -24,6 +25,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.statusBarColor = Color.TRANSPARENT
+        window.navigationBarColor = Color.TRANSPARENT
+
         // Auto-initialize LTS SDK if saved config exists
         val savedConfig = ConfigManager.loadSavedConfig(this)
         if (savedConfig != null) {
@@ -41,7 +46,6 @@ class MainActivity : ComponentActivity() {
             )
         }
 
-        enableEdgeToEdge()
         setContent {
             LTSDemoTheme {
                 MainContainer()
@@ -53,7 +57,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainContainer() {
-    var selectedTab by remember { mutableIntStateOf(0) }
+    var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("单条上报", "批量上报", "多实例上报", "配置详情")
 
     Scaffold(
@@ -104,7 +108,7 @@ fun MainContainer() {
 
 @Composable
 fun FloatingLogCount() {
-    var logCount by remember { mutableLongStateOf(0L) }
+    var logCount by remember { mutableStateOf(0L) }
 
     LaunchedEffect(Unit) {
         while (true) {
