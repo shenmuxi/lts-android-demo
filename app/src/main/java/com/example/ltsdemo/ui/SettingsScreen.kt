@@ -114,55 +114,60 @@ fun SettingsScreen() {
         OutlinedTextField(value = cacheThreshold, onValueChange = { cacheThreshold = it }, label = { Text("缓存阈值 (条数)") }, modifier = Modifier.fillMaxWidth().height(64.dp))
         OutlinedTextField(value = timeInterval, onValueChange = { timeInterval = it }, label = { Text("上报间隔 (秒)") }, modifier = Modifier.fillMaxWidth().height(64.dp))
 
-        Button(
-            onClick = {
-                val newConfig = LtsFullConfig(
-                    title = currentConfig.title,
-                    host = host,
-                    region = region,
-                    projectId = projectId,
-                    ak = ak,
-                    sk = sk,
-                    cacheThreshold = cacheThreshold.toIntOrNull() ?: 200,
-                    timeInterval = timeInterval.toIntOrNull() ?: 3,
-                    instances = listOf(LtsInstance(groupId, streamId))
-                )
-                // Persistence
-                ConfigManager.saveConfig(context, newConfig)
-                
-                // SDK Initialization
-                try {
-                    LtsManager.initialize(
-                        context.applicationContext as android.app.Application,
-                        newConfig.host,
-                        newConfig.region,
-                        newConfig.projectId,
-                        newConfig.instances.firstOrNull()?.groupId ?: "",
-                        newConfig.instances.firstOrNull()?.streamId ?: "",
-                        newConfig.ak,
-                        newConfig.sk,
-                        newConfig.cacheThreshold,
-                        newConfig.timeInterval
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Button(
+                onClick = {
+                    val newConfig = LtsFullConfig(
+                        title = currentConfig.title,
+                        host = host,
+                        region = region,
+                        projectId = projectId,
+                        ak = ak,
+                        sk = sk,
+                        cacheThreshold = cacheThreshold.toIntOrNull() ?: 200,
+                        timeInterval = timeInterval.toIntOrNull() ?: 3,
+                        instances = listOf(LtsInstance(groupId, streamId))
                     )
-                    val toast = Toast.makeText(context, "配置已保存，SDK 初始化成功", Toast.LENGTH_SHORT)
-                    toast.setGravity(android.view.Gravity.CENTER, 0, 0)
-                    toast.show()
-                } catch (e: Exception) {
-                    val toast = Toast.makeText(context, "SDK 初始化失败: ${e.message}", Toast.LENGTH_LONG)
-                    toast.setGravity(android.view.Gravity.CENTER, 0, 0)
-                    toast.show()
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("保存并初始化 SDK")
-        }
+                    // Persistence
+                    ConfigManager.saveConfig(context, newConfig)
+                    
+                    // SDK Initialization
+                    try {
+                        LtsManager.initialize(
+                            context.applicationContext as android.app.Application,
+                            newConfig.host,
+                            newConfig.region,
+                            newConfig.projectId,
+                            newConfig.instances.firstOrNull()?.groupId ?: "",
+                            newConfig.instances.firstOrNull()?.streamId ?: "",
+                            newConfig.ak,
+                            newConfig.sk,
+                            newConfig.cacheThreshold,
+                            newConfig.timeInterval
+                        )
+                        val toast = Toast.makeText(context, "配置已保存，SDK 初始化成功", Toast.LENGTH_SHORT)
+                        toast.setGravity(android.view.Gravity.CENTER, 0, 0)
+                        toast.show()
+                    } catch (e: Exception) {
+                        val toast = Toast.makeText(context, "SDK 初始化失败: ${e.message}", Toast.LENGTH_LONG)
+                        toast.setGravity(android.view.Gravity.CENTER, 0, 0)
+                        toast.show()
+                    }
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("保存初始化", maxLines = 1)
+            }
 
-        OutlinedButton(
-            onClick = { showPasswordDialog = true },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("加载预配置")
+            OutlinedButton(
+                onClick = { showPasswordDialog = true },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("加载预配置", maxLines = 1)
+            }
         }
     }
     
