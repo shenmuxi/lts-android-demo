@@ -116,12 +116,17 @@ object LtsManager {
         val labelMap = HashMap<String, Any>()
         labelMap.putAll(labels)
 
-        multiSdkInstances.forEach { sdk ->
+        // 使用 indexed 遍历，获取实例序号
+        multiSdkInstances.forEachIndexed { index, sdk ->
             when (contents) {
                 is String -> sdk.report(contents, labelMap)
                 is Map<*, *> -> {
                     val contentMap = HashMap<String, Any?>()
                     contents.forEach { (k, v) -> contentMap[k.toString()] = v }
+
+                    // 核心逻辑：添加实例序号作为 key
+                    contentMap["instance_idx"] = index
+
                     sdk.report(contentMap, labelMap)
                 }
                 else -> sdk.report(contents.toString(), labelMap)
@@ -133,12 +138,17 @@ object LtsManager {
         val labelMap = HashMap<String, Any>()
         labelMap.putAll(labels)
 
-        multiSdkInstances.forEach { sdk ->
+        // 使用 indexed 遍历，获取实例序号
+        multiSdkInstances.forEachIndexed { index, sdk ->
             when (contents) {
                 is String -> sdk.reportImmediately(contents, labelMap)
                 is Map<*, *> -> {
                     val contentMap = HashMap<String, Any?>()
                     contents.forEach { (k, v) -> contentMap[k.toString()] = v }
+
+                    // 核心逻辑：添加实例序号作为 key
+                    contentMap["instance_idx"] = index
+
                     sdk.reportImmediately(contentMap, labelMap)
                 }
                 else -> sdk.reportImmediately(contents.toString(), labelMap)

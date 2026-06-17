@@ -22,6 +22,7 @@ fun ConcurrentTestScreen() {
     // Timed Test State
     var intervalSeconds by remember { mutableStateOf("5") }
     var isTimedRunning by remember { mutableStateOf(false) }
+    var timedProgress by remember { mutableStateOf(0) }
     
     val scope = rememberCoroutineScope()
 
@@ -34,7 +35,7 @@ fun ConcurrentTestScreen() {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         // Section 1: Batch/Concurrent Reporting
-        Text("批量并发上报测试", style = MaterialTheme.typography.titleLarge)
+        Text("批量并发上报", style = MaterialTheme.typography.titleLarge)
 
         OutlinedTextField(
             value = threadCount,
@@ -94,7 +95,7 @@ fun ConcurrentTestScreen() {
         Divider(modifier = Modifier.padding(vertical = 4.dp))
 
         // Section 2: Timed Reporting
-        Text("定时上报测试", style = MaterialTheme.typography.titleLarge)
+        Text("定时上报", style = MaterialTheme.typography.titleLarge)
         
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedTextField(
@@ -107,6 +108,7 @@ fun ConcurrentTestScreen() {
                 onClick = {
                     isTimedRunning = !isTimedRunning
                     if (isTimedRunning) {
+                        timedProgress = 0
                         scope.launch {
                             val interval = (intervalSeconds.toLongOrNull() ?: 5) * 1000
                             while (isTimedRunning) {
@@ -115,6 +117,7 @@ fun ConcurrentTestScreen() {
                                     mapOf("type" to "timed_report"),
                                     "定时上报随机内容: $randomContent"
                                 )
+                                timedProgress++
                                 delay(interval)
                             }
                         }
@@ -122,20 +125,20 @@ fun ConcurrentTestScreen() {
                 },
                 modifier = Modifier.weight(1f).height(56.dp)
             ) {
-                Text(if (isTimedRunning) "停止定时上报" else "开始定时上报")
+                Text(if (isTimedRunning) "停止 ($timedProgress)" else "开始定时上报")
             }
         }
 
         Divider(modifier = Modifier.padding(vertical = 4.dp))
 
         // Section 3: Large Log Reporting
-        Text("单条大日志测试", style = MaterialTheme.typography.titleLarge)
+        Text("上报单条大日志", style = MaterialTheme.typography.titleLarge)
         
         Button(onClick = {
-            val largeContent = "A".repeat(30 * 1024) // ~30KB
+            val largeContent = "A".repeat(30 * 1000) // ~30KB
             LtsManager.report(mapOf("size_test" to "large"), largeContent)
         }, modifier = Modifier.fillMaxWidth()) {
-            Text("单条大日志上报 (30KB)")
+            Text("单条大日志上报 (约30*1024长度)")
         }
     }
 }

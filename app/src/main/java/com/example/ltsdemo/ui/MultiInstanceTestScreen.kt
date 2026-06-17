@@ -113,51 +113,103 @@ fun MultiInstanceTestScreen() {
             LinearProgressIndicator(progress = progress, modifier = Modifier.fillMaxWidth())
         }
 
-        Button(
-            onClick = {
-                val config = selectedConfig ?: return@Button
-                val totalToReport = reportCount.toIntOrNull() ?: 0
-                val threads = threadCount.toIntOrNull() ?: 1
-                
-                if (totalToReport <= 0) return@Button
-                
-                isReporting = true
-                progress = 0f
-                
-                scope.launch(Dispatchers.Default) {
-                    val executor = Executors.newFixedThreadPool(threads)
-                    val completedCount = AtomicInteger(0)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Button(
+                onClick = {
+                    val config = selectedConfig ?: return@Button
+                    val totalToReport = reportCount.toIntOrNull() ?: 0
+                    val threads = threadCount.toIntOrNull() ?: 1
                     
-                    repeat(totalToReport) { idx ->
-                        executor.execute {
-                            val labels = mapOf("batch_idx" to idx)
-                            val content = mapOf(
-                                "msg" to "Multi-instance concurrent report",
-                                "rand" to generateRandomString(10),
-                                "batch" to idx
-                            )
-                            LtsManager.reportMulti(labels, content)
-                            
-                            val completed = completedCount.incrementAndGet()
-                            progress = completed.toFloat() / totalToReport
+                    if (totalToReport <= 0) return@Button
+                    
+                    isReporting = true
+                    progress = 0f
+                    
+                    scope.launch(Dispatchers.Default) {
+                        val executor = Executors.newFixedThreadPool(threads)
+                        val completedCount = AtomicInteger(0)
+                        
+                        repeat(totalToReport) { idx ->
+                            executor.execute {
+                                val labels = mapOf("batch_idx" to idx)
+                                val content = mapOf(
+                                    "msg" to "Multi-instance concurrent report",
+                                    "rand" to generateRandomString(10),
+                                    "batch" to idx
+                                )
+                                LtsManager.reportMulti(labels, content)
+                                
+                                val completed = completedCount.incrementAndGet()
+                                progress = completed.toFloat() / totalToReport
+                            }
+                        }
+                        
+                        executor.shutdown()
+                        while (!executor.isTerminated) { 
+                            kotlinx.coroutines.delay(100) 
+                        }
+                        
+                        withContext(Dispatchers.Main) {
+                            isReporting = false
+                            Toast.makeText(context, "并发上报完成", Toast.LENGTH_SHORT).show()
                         }
                     }
+                },
+                modifier = Modifier.weight(1f),
+                enabled = !isReporting && selectedConfig != null
+            ) {
+                Text(if (isReporting) "正在上报..." else "并发上报")
+            }
+
+            Button(
+                onClick = {
+                    val config = selectedConfig ?: return@Button
+                    val totalToReport = reportCount.toIntOrNull() ?: 0
+                    val threads = threadCount.toIntOrNull() ?: 1
                     
-                    executor.shutdown()
-                    while (!executor.isTerminated) { 
-                        kotlinx.coroutines.delay(100) 
-                    }
+                    if (totalToReport <= 0) return@Button
                     
-                    withContext(Dispatchers.Main) {
-                        isReporting = false
-                        Toast.makeText(context, "并发上报完成", Toast.LENGTH_SHORT).show()
+                    isReporting = true
+                    progress = 0f
+                    
+                    scope.launch(Dispatchers.Default) {
+                        val executor = Executors.newFixedThreadPool(threads)
+                        val completedCount = AtomicInteger(0)
+                        
+                        repeat(totalToReport) { idx ->
+                            executor.execute {
+                                val labels = mapOf("batch_idx" to idx)
+                                val content = mapOf(
+                                    "msg" to "Multi-instance concurrent immediate",
+                                    "rand" to generateRandomString(10),
+                                    "batch" to idx
+                                )
+                                LtsManager.reportMultiImmediately(labels, content)
+                                
+                                val completed = completedCount.incrementAndGet()
+                                progress = completed.toFloat() / totalToReport
+                            }
+                        }
+                        
+                        executor.shutdown()
+                        while (!executor.isTerminated) { 
+                            kotlinx.coroutines.delay(100) 
+                        }
+                        
+                        withContext(Dispatchers.Main) {
+                            isReporting = false
+                            Toast.makeText(context, "并发立即上报完成", Toast.LENGTH_SHORT).show()
+                        }
                     }
-                }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isReporting && selectedConfig != null
-        ) {
-            Text(if (isReporting) "正在上报..." else "并发上报")
+                },
+                modifier = Modifier.weight(1f),
+                enabled = !isReporting && selectedConfig != null
+            ) {
+                Text(if (isReporting) "正在上报..." else "并发立即上报")
+            }
         }
 
         // Password Dialog (keep existing)
