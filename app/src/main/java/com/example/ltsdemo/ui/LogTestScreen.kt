@@ -1,5 +1,6 @@
 package com.example.ltsdemo.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -8,12 +9,30 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.ltsdemo.LtsManager
+import com.cloud.lts.database.LogDatabase
+import kotlinx.coroutines.*
+import java.util.concurrent.Executors
+import java.util.concurrent.ExecutorService
 import kotlin.random.Random
 
 @Composable
 fun LogTestScreen() {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var lockJob by remember { mutableStateOf<Job?>(null) }
+    val isDbLocked = lockJob != null
+
+    // 专门用于锁定数据库的单线程调度器，确保开始和结束事务在同一线程
+    val lockDispatcher = remember { Executors.newSingleThreadExecutor().asCoroutineDispatcher() }
+    DisposableEffect(Unit) {
+        onDispose {
+            (lockDispatcher.executor as ExecutorService).shutdown()
+        }
+    }
+
     // Input Key/Value
     var inputKey by remember { mutableStateOf("") }
     var inputValue by remember { mutableStateOf("") }
@@ -165,20 +184,74 @@ fun LogTestScreen() {
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(onClick = {
+                if (!LtsManager.isInitialized()) {
+                    Toast.makeText(context, "SDK未初始化，请先配置", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
+                if (contentMap.isEmpty()) {
+                    Toast.makeText(context, "Content 不能为空", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
                 LtsManager.report(labelsMap.toMap(), contentMap.toMap())
             }, modifier = Modifier.weight(1f)) {
                 Text("普通上报")
             }
 
             Button(onClick = {
+                if (!LtsManager.isInitialized()) {
+                    Toast.makeText(context, "SDK未初始化，请先配置", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
+                if (contentMap.isEmpty()) {
+                    Toast.makeText(context, "Content 不能为空", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
                 LtsManager.reportImmediately(labelsMap.toMap(), contentMap.toMap())
             }, modifier = Modifier.weight(1f)) {
                 Text("立即上报")
             }
+        }
+
+        Button(
+            onClick = {
+                if (!LtsManager.isInitialized()) {
+                    Toast.makeText(context, "SDK未初始化，请先配置", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
+                if (!isDbLocked) {
+                    lockJob = scope.launch(lockDispatcher) {
+                        val db = LogDatabase.getInstance(context)
+                        val sdb = db.openHelper.writableDatabase
+                        try {
+                            sdb.beginTransaction()
+                            awaitCancellation()
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        } finally {
+                            withContext(NonCancellable) {
+                                try {
+                                    if (sdb.inTransaction()) {
+                                        sdb.endTransaction()
+                                    }
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    lockJob?.cancel()
+                    lockJob = null
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (isDbLocked) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+            )
+        ) {
+            Text(if (isDbLocked) "解锁数据库" else "锁定数据库-触发SQL BUSY异常")
         }
     }
 }
