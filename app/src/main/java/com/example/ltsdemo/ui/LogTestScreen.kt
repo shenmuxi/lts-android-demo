@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import com.example.ltsdemo.LtsManager
 import com.example.ltsdemo.ui.components.CenterSnackbarHost
 import com.cloud.lts.database.LogDatabase
+import java.io.FileOutputStream
 import kotlinx.coroutines.*
 import java.util.concurrent.Executors
 import java.util.concurrent.ExecutorService
@@ -252,6 +253,53 @@ fun LogTestScreen() {
                 )
             ) {
                 Text(if (isDbLocked) "解锁数据库" else "锁定数据库 - 触发SQL BUSY异常")
+            }
+
+            Button(
+                onClick = {
+                    if (!LtsManager.isInitialized()) {
+                        scope.launch { snackbarHostState.showSnackbar("SDK未初始化，请先配置") }
+                        return@Button
+                    }
+                    scope.launch(Dispatchers.IO) {
+                        try {
+                            val db = LogDatabase.getInstance(context)
+                            val dbPath = db.openHelper.writableDatabase.path
+                            
+                            // 1. 关闭数据库连接
+                            db.close()
+                            
+                            val dbFile = java.io.File(dbPath)
+                            if (dbFile.exists()) {
+                                // 2. 写入大量垃圾数据
+                                FileOutputStream(dbFile).use { fos ->
+                                    val junk = "CORRUPTED_DATABASE_DATA_".repeat(1000).toByteArray()
+                                    fos.write(junk)
+                                    fos.flush()
+                                    fos.fd.sync() // 强制同步到磁盘
+                                }
+                                
+                                // 3. 尝试破坏相关的 WAL 和 SHM 文件
+                                java.io.File("$dbPath-wal").delete()
+                                java.io.File("$dbPath-shm").delete()
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                        
+                        // 4. 延迟一小会儿确保 IO 完成
+                        delay(500)
+
+                        withContext(Dispatchers.Main) {
+                            android.os.Process.killProcess(android.os.Process.myPid())
+                            java.lang.System.exit(0)
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
+            ) {
+                Text("毁坏数据库并立即退出App")
             }
         }
         
