@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import com.example.ltsdemo.ui.LogTestScreen
 import com.example.ltsdemo.ui.SettingsScreen
@@ -96,11 +97,11 @@ fun MainContainer() {
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             Surface(modifier = Modifier.fillMaxSize()) {
-                when (selectedTab) {
-                    0 -> LogTestScreen()
-                    1 -> ConcurrentTestScreen()
-                    2 -> MultiInstanceTestScreen()
-                    3 -> SettingsScreen()
+                Box(modifier = Modifier.fillMaxSize()) {
+                    TabContent(0, selectedTab) { LogTestScreen() }
+                    TabContent(1, selectedTab) { ConcurrentTestScreen() }
+                    TabContent(2, selectedTab) { MultiInstanceTestScreen() }
+                    TabContent(3, selectedTab) { SettingsScreen() }
                 }
             }
             FloatingLogCount()
@@ -128,6 +129,28 @@ fun MainContainer() {
                     showInitToast = false
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun TabContent(index: Int, selectedIndex: Int, content: @Composable () -> Unit) {
+    val active = index == selectedIndex
+    // Preserve the state once the tab has been visited
+    var hasBeenVisited by remember { mutableStateOf(false) }
+    if (active) hasBeenVisited = true
+    
+    if (hasBeenVisited) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    alpha = if (active) 1f else 0f
+                    // If not active, move far away to prevent interaction and layout overlap issues
+                    translationX = if (active) 0f else 10000f
+                }
+        ) {
+            content()
         }
     }
 }
