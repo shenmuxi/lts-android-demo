@@ -40,6 +40,10 @@ object LtsManager {
         val userConfig = builder.build()
 
         LTSSDK.setLogLevel(LogLevel.DEBUG)
+        
+        // Release existing default instance if any
+        ltsSdk?.safeRelease()
+
         ltsSdk = LTSSDK(application, userConfig)
         
         // Also add to multi-instances for consistency
@@ -49,6 +53,9 @@ object LtsManager {
 
     fun initializeMulti(application: Application, config: LtsFullConfig) {
         LTSSDK.setLogLevel(LogLevel.DEBUG)
+        
+        // Release existing instances before re-initializing
+        releaseAll()
         multiSdkInstances.clear()
         
         config.instances.forEach { instance ->
@@ -142,4 +149,30 @@ object LtsManager {
     fun isInitialized(): Boolean = ltsSdk != null && ltsSdk!!.isInitialized
     
     fun getMultiInstanceCount(): Int = multiSdkInstances.size
+
+    /**
+     * Safely releases an LTSSDK instance by checking for the 'release' method via reflection.
+     * This ensures compatibility with older SDK versions that don't have this method.
+     */
+    private fun LTSSDK.safeRelease() {
+        try {
+            val releaseMethod = this.javaClass.getMethod("release")
+            releaseMethod.invoke(this)
+        } catch (e: NoSuchMethodException) {
+            // Method doesn't exist in this version of the SDK, ignore
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    /**
+     * Releases all active SDK instances.
+     */
+    fun releaseAll() {
+        ltsSdk?.safeRelease()
+        ltsSdk = null
+        
+        multiSdkInstances.forEach { it.safeRelease() }
+        multiSdkInstances.clear()
+    }
 }
