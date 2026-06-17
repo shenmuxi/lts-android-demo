@@ -19,6 +19,7 @@ import com.example.ltsdemo.ui.ConcurrentTestScreen
 import com.example.ltsdemo.ui.MultiInstanceTestScreen
 import com.example.ltsdemo.ui.theme.LTSDemoTheme
 import com.cloud.lts.database.DatabaseUtil
+import com.cloud.lts.util.ApplicationUtil
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
@@ -158,6 +159,7 @@ fun TabContent(index: Int, selectedIndex: Int, content: @Composable () -> Unit) 
 @Composable
 fun FloatingLogCount() {
     var logCount by remember { mutableStateOf(0L) }
+    val sdkVersion = remember { ApplicationUtil.getSdkVersion() }
 
     LaunchedEffect(Unit) {
         while (true) {
@@ -188,7 +190,7 @@ fun FloatingLogCount() {
             shadowElevation = 4.dp
         ) {
             Text(
-                text = "DB: $logCount",
+                text = "SDK: $sdkVersion | DB: $logCount",
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
