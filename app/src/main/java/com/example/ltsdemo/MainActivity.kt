@@ -174,7 +174,7 @@ fun FloatingLogCount() {
                 // Ignore errors
                 delay(1)
             }
-            delay(2000)
+            delay(1000)
         }
     }
 

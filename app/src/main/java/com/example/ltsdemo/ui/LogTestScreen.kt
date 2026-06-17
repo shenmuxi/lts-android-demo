@@ -61,14 +61,14 @@ fun LogTestScreen() {
             ) {
                 Column(modifier = Modifier.padding(8.dp)) {
                     Row(
-                        modifier = Modifier.fillMaxWidth(), 
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically // Vertical alignment
                     ) {
                         Text("Labels", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
                         if (labelsMap.isNotEmpty()) {
                             TextButton(
-                                onClick = { labelsMap.clear() }, 
+                                onClick = { labelsMap.clear() },
                                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
                                 modifier = Modifier.heightIn(max = 32.dp) // Ensure button doesn't stretch
                             ) {
@@ -93,14 +93,14 @@ fun LogTestScreen() {
             ) {
                 Column(modifier = Modifier.padding(8.dp)) {
                     Row(
-                        modifier = Modifier.fillMaxWidth(), 
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically // Vertical alignment
                     ) {
                         Text("Content", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.secondary)
                         if (contentMap.isNotEmpty()) {
                             TextButton(
-                                onClick = { contentMap.clear() }, 
+                                onClick = { contentMap.clear() },
                                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
                                 modifier = Modifier.heightIn(max = 32.dp) // Ensure button doesn't stretch
                             ) {
@@ -121,18 +121,18 @@ fun LogTestScreen() {
         // 2. Key/Value Input Section with fixed height and char count
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedTextField(
-                value = inputKey, 
-                onValueChange = { if (it.length <= 100) inputKey = it }, 
-                label = { Text("键 (Key)") }, 
+                value = inputKey,
+                onValueChange = { if (it.length <= 100) inputKey = it },
+                label = { Text("键 (Key)") },
                 modifier = Modifier.weight(1f).height(90.dp), // Fixed height
                 supportingText = { Text("${inputKey.length}/100") }, // Char count
                 singleLine = true,
                 maxLines = 1
             )
             OutlinedTextField(
-                value = inputValue, 
-                onValueChange = { if (it.length <= 100) inputValue = it }, 
-                label = { Text("值 (Value)") }, 
+                value = inputValue,
+                onValueChange = { if (it.length <= 100) inputValue = it },
+                label = { Text("值 (Value)") },
                 modifier = Modifier.weight(1f).height(90.dp), // Fixed height
                 supportingText = { Text("${inputValue.length}/100") }, // Char count
                 singleLine = true,
@@ -251,7 +251,7 @@ fun LogTestScreen() {
                 containerColor = if (isDbLocked) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
             )
         ) {
-            Text(if (isDbLocked) "解锁数据库" else "锁定数据库-触发SQL BUSY异常")
+            Text(if (isDbLocked) "解锁数据库" else "锁定数据库 - 触发SQL BUSY异常")
         }
     }
 }
