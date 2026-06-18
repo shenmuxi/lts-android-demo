@@ -68,7 +68,7 @@ fun MainContainer() {
         // Removed TopAppBar as per request
         bottomBar = {
             NavigationBar(
-                modifier = Modifier.height(64.dp),
+                modifier = Modifier.height(80.dp),
                 containerColor = MaterialTheme.colorScheme.surfaceVariant
             ) {
                 tabs.forEachIndexed { index, title ->

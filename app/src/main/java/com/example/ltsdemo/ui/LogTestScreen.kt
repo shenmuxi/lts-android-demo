@@ -252,7 +252,7 @@ fun LogTestScreen() {
                     containerColor = if (isDbLocked) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
                 )
             ) {
-                Text(if (isDbLocked) "解锁数据库" else "锁定数据库 - 触发SQL BUSY异常")
+                Text(if (isDbLocked) "解锁数据库" else "锁定数据库 - 触发SQLite Busy异常")
             }
 
             Button(
@@ -265,31 +265,23 @@ fun LogTestScreen() {
                         try {
                             val db = LogDatabase.getInstance(context)
                             val dbPath = db.openHelper.writableDatabase.path
-                            
-                            // 1. 关闭数据库连接
                             db.close()
                             
                             val dbFile = java.io.File(dbPath)
                             if (dbFile.exists()) {
-                                // 2. 写入大量垃圾数据
                                 FileOutputStream(dbFile).use { fos ->
                                     val junk = "CORRUPTED_DATABASE_DATA_".repeat(1000).toByteArray()
                                     fos.write(junk)
                                     fos.flush()
-                                    fos.fd.sync() // 强制同步到磁盘
+                                    fos.fd.sync()
                                 }
-                                
-                                // 3. 尝试破坏相关的 WAL 和 SHM 文件
                                 java.io.File("$dbPath-wal").delete()
                                 java.io.File("$dbPath-shm").delete()
                             }
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }
-                        
-                        // 4. 延迟一小会儿确保 IO 完成
                         delay(500)
-
                         withContext(Dispatchers.Main) {
                             android.os.Process.killProcess(android.os.Process.myPid())
                             java.lang.System.exit(0)
@@ -299,11 +291,50 @@ fun LogTestScreen() {
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
             ) {
-                Text("毁坏数据库并立即退出App")
+                Text("毁坏数据库 - 写入脏数据")
+            }
+
+            Button(
+                onClick = {
+                    if (!LtsManager.isInitialized()) {
+                        scope.launch { snackbarHostState.showSnackbar("SDK未初始化，请先配置") }
+                        return@Button
+                    }
+                    scope.launch(Dispatchers.IO) {
+                        try {
+                            val db = LogDatabase.getInstance(context)
+                            val dbPath = db.openHelper.writableDatabase.path
+                            db.close()
+
+                            val dbFile = java.io.File(dbPath)
+                            if (dbFile.exists()) {
+                                context.assets.open("configs_encrypted.json").use { inputStream ->
+                                    FileOutputStream(dbFile).use { outputStream ->
+                                        inputStream.copyTo(outputStream)
+                                        outputStream.flush()
+                                        outputStream.fd.sync()
+                                    }
+                                }
+                                java.io.File("$dbPath-wal").delete()
+                                java.io.File("$dbPath-shm").delete()
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                        delay(500)
+                        withContext(Dispatchers.Main) {
+                            android.os.Process.killProcess(android.os.Process.myPid())
+                            java.lang.System.exit(0)
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+            ) {
+                Text("毁坏数据库 - 非DB文件")
             }
         }
         
-        // 居中显示的 SnackbarHost
         CenterSnackbarHost(snackbarHostState)
     }
 }
