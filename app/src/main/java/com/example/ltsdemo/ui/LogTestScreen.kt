@@ -252,7 +252,7 @@ fun LogTestScreen() {
                     containerColor = if (isDbLocked) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
                 )
             ) {
-                Text(if (isDbLocked) "解锁数据库" else "锁定数据库 - 触发SQLite Busy异常")
+                Text(if (isDbLocked) "解锁数据库" else "锁定数据库 - SQLITE_BUSY")
             }
 
             Button(
@@ -266,15 +266,28 @@ fun LogTestScreen() {
                             val db = LogDatabase.getInstance(context)
                             val dbPath = db.openHelper.writableDatabase.path
                             db.close()
-                            
+
                             val dbFile = java.io.File(dbPath)
                             if (dbFile.exists()) {
-                                FileOutputStream(dbFile).use { fos ->
-                                    val junk = "CORRUPTED_DATABASE_DATA_".repeat(1000).toByteArray()
-                                    fos.write(junk)
-                                    fos.flush()
-                                    fos.fd.sync()
+                                // 使用 RandomAccessFile 以读写模式打开，不截断文件
+                                java.io.RandomAccessFile(dbFile, "rw").use { raf ->
+                                    if (raf.length() > 100) {
+                                        // 关键：跳过前 100 字节的 SQLite Header
+                                        raf.seek(100)
+                                        // 写入大量脏数据破坏 B-Tree 结构和 Page 数据
+                                        val junk = "SQLITE_CORRUPT_TRIGGER_".repeat(500).toByteArray()
+                                        raf.write(junk)
+                                    } else {
+                                        // 如果文件过小（初始化未完成），则写入一个标准头+脏数据
+                                        val header = "SQLite format 3\u0000".toByteArray().copyOf(100)
+                                        raf.seek(0)
+                                        raf.write(header)
+                                        raf.write("CORRUPT_BODY".repeat(50).toByteArray())
+                                    }
+                                    raf.fd.sync()
                                 }
+
+                                // 必须删除日志文件，防止 SQLite 自动从 WAL 恢复正确数据
                                 java.io.File("$dbPath-wal").delete()
                                 java.io.File("$dbPath-shm").delete()
                             }
@@ -291,7 +304,7 @@ fun LogTestScreen() {
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
             ) {
-                Text("毁坏数据库 - 写入脏数据")
+                Text("毁坏数据库 - SQLITE_CORRUPT")
             }
 
             Button(
@@ -331,7 +344,7 @@ fun LogTestScreen() {
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
             ) {
-                Text("毁坏数据库 - 非DB文件")
+                Text("毁坏数据库 - SQLITE_NOADB")
             }
         }
         
