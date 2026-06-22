@@ -90,7 +90,7 @@ fun ConcurrentTestScreen() {
                             repeat(logs) { lId ->
                                 val randomContent = generateRandomString(100)
                                 val labels = mapOf("thread_id" to "tid_$tId")
-                                val content = "并发测试随机内容($lId): $randomContent"
+                                val content = "并发测试随机内容_$lId: $randomContent"
                                 
                                 if (useReportImmediately) {
                                     LtsManager.reportImmediately(labels, content)
