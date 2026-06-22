@@ -5,6 +5,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.ltsdemo.LtsManager
@@ -13,6 +14,9 @@ import kotlin.random.Random
 
 @Composable
 fun ConcurrentTestScreen() {
+    // Reporting Mode State
+    var useReportImmediately by remember { mutableStateOf(false) }
+
     // Concurrent Test State
     var threadCount by remember { mutableStateOf("5") }
     var logCountPerThread by remember { mutableStateOf("10") }
@@ -37,6 +41,27 @@ fun ConcurrentTestScreen() {
         // Section 1: Batch/Concurrent Reporting
         Text("批量并发上报", style = MaterialTheme.typography.titleLarge)
 
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(
+                    selected = !useReportImmediately,
+                    onClick = { useReportImmediately = false }
+                )
+                Text("缓存上报", modifier = Modifier.padding(start = 4.dp))
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(
+                    selected = useReportImmediately,
+                    onClick = { useReportImmediately = true }
+                )
+                Text("立即上报", modifier = Modifier.padding(start = 4.dp))
+            }
+        }
+
         OutlinedTextField(
             value = threadCount,
             onValueChange = { threadCount = it },
@@ -51,6 +76,8 @@ fun ConcurrentTestScreen() {
             modifier = Modifier.fillMaxWidth().height(64.dp)
         )
 
+
+
         Button(
             onClick = {
                 val threads = threadCount.toIntOrNull() ?: 5
@@ -62,10 +89,15 @@ fun ConcurrentTestScreen() {
                         launch {
                             repeat(logs) { lId ->
                                 val randomContent = generateRandomString(100)
-                                LtsManager.report(
-                                    mapOf("thread_id" to tId),
-                                    "并发测试随机内容($lId): $randomContent"
-                                )
+                                val labels = mapOf("thread_id" to tId)
+                                val content = "并发测试随机内容($lId): $randomContent"
+                                
+                                if (useReportImmediately) {
+                                    LtsManager.reportImmediately(labels, content)
+                                } else {
+                                    LtsManager.report(labels, content)
+                                }
+
                                 withContext(Dispatchers.Main) {
                                     progress++
                                 }
@@ -113,10 +145,15 @@ fun ConcurrentTestScreen() {
                             val interval = (intervalSeconds.toLongOrNull() ?: 5) * 1000
                             while (isTimedRunning) {
                                 val randomContent = generateRandomString(50)
-                                LtsManager.report(
-                                    mapOf("type" to "timed_report"),
-                                    "定时上报随机内容: $randomContent"
-                                )
+                                val labels = mapOf("type" to "timed_report")
+                                val content = "定时上报随机内容: $randomContent"
+                                
+                                if (useReportImmediately) {
+                                    LtsManager.reportImmediately(labels, content)
+                                } else {
+                                    LtsManager.report(labels, content)
+                                }
+                                
                                 timedProgress++
                                 delay(interval)
                             }
@@ -135,10 +172,15 @@ fun ConcurrentTestScreen() {
         Text("上报单条大日志", style = MaterialTheme.typography.titleLarge)
         
         Button(onClick = {
-            val largeContent = "A".repeat(30 * 1000) // ~30KB
-            LtsManager.report(mapOf("size_test" to "large"), largeContent)
+            val labels = mapOf("size_test" to "large")
+            val content = "A".repeat(30 * 1000) // ~30KB
+            if (useReportImmediately) {
+                LtsManager.reportImmediately(labels, content)
+            } else {
+                LtsManager.report(labels, content)
+            }
         }, modifier = Modifier.fillMaxWidth()) {
-            Text("单条大日志上报 (约30*1024长度)")
+            Text("上报 (约30*1024长度)")
         }
     }
 }
