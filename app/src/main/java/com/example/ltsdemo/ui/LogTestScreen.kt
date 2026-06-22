@@ -197,7 +197,7 @@ fun LogTestScreen() {
                     }
                     LtsManager.report(labelsMap.toMap(), contentMap.toMap())
                 }, modifier = Modifier.weight(1f)) {
-                    Text("普通上报")
+                    Text("缓存上报")
                 }
 
                 Button(onClick = {

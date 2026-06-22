@@ -159,17 +159,24 @@ fun TabContent(index: Int, selectedIndex: Int, content: @Composable () -> Unit) 
 @Composable
 fun FloatingLogCount() {
     var logCount by remember { mutableStateOf(0L) }
+    var uptimeMinutes by remember { mutableStateOf(0L) }
     val sdkVersion = remember { ApplicationUtil.getSdkVersion() }
+    val startTime = remember { System.currentTimeMillis() }
 
     LaunchedEffect(Unit) {
         while (true) {
             try {
+                // Update DB count
                 if (DatabaseUtil.isInitDatabaseComplete) {
                     val count = withContext(Dispatchers.IO) {
                         DatabaseUtil.dataDao.getAllCount()
                     }
                     logCount = count
                 }
+                
+                // Update Uptime
+                uptimeMinutes = (System.currentTimeMillis() - startTime) / (1000 * 60)
+                
             } catch (e: Exception) {
                 // Ignore errors
                 delay(1)
@@ -190,7 +197,7 @@ fun FloatingLogCount() {
             shadowElevation = 4.dp
         ) {
             Text(
-                text = "SDK: $sdkVersion | DB: $logCount",
+                text = "SDK: $sdkVersion | DB: $logCount | T: $uptimeMinutes",
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
