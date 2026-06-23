@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.ltsdemo"
-        minSdk = 24
+        minSdk = 21
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -45,7 +45,6 @@ dependencies {
     implementation("com.google.code.gson:gson:2.8.9")
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.common)
-    implementation(libs.androidx.room.ktx)
     // Note: Use kapt or ksp for room-compiler if needed, but since we are not defining DAOs in this app module, runtime is enough.
     // If you add DAOs here, add: kapt(libs.androidx.room.compiler)
     implementation(platform(libs.androidx.compose.bom))

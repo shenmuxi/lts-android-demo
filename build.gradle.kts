@@ -8,7 +8,7 @@ ext {
     set("compileSdkVersion", 33)
     set("buildToolsVersion", "33.0.1")
     set("compileSdk", 33)
-    set("minSdk", 18)
+    set("minSdk", 21)
     set("targetSdk", 33)
     set("sdk_version_code", 130)
     set("sdk_version_name", "1.0.30")
