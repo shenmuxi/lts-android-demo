@@ -3,10 +3,12 @@ package com.example.ltsdemo.ui
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.ltsdemo.LtsManager
 import kotlinx.coroutines.*
@@ -27,6 +29,9 @@ fun ConcurrentTestScreen() {
     var intervalSeconds by remember { mutableStateOf("5") }
     var isTimedRunning by remember { mutableStateOf(false) }
     var timedProgress by remember { mutableStateOf(0) }
+
+    // Large Log Test State
+    var largeLogLength by remember { mutableStateOf("30720") }
     
     val scope = rememberCoroutineScope()
 
@@ -171,16 +176,25 @@ fun ConcurrentTestScreen() {
         // Section 3: Large Log Reporting
         Text("上报单条大日志", style = MaterialTheme.typography.titleLarge)
         
+        OutlinedTextField(
+            value = largeLogLength,
+            onValueChange = { largeLogLength = it },
+            label = { Text("日志长度 (字符数)") },
+            modifier = Modifier.fillMaxWidth().height(64.dp),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        )
+        
         Button(onClick = {
-            val labels = mapOf("size_test" to "large")
-            val content = "A".repeat(30 * 1000) // ~30KB
+            val length = largeLogLength.toIntOrNull() ?: 30720
+            val labels = mapOf("size_test" to "large", "length" to length)
+            val content = generateRandomString(length)
             if (useReportImmediately) {
                 LtsManager.reportImmediately(labels, content)
             } else {
                 LtsManager.report(labels, content)
             }
         }, modifier = Modifier.fillMaxWidth()) {
-            Text("上报 (约30*1024长度)")
+            Text("上报随机内容大日志")
         }
     }
 }
