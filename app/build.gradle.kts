@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "com.example.ltsdemo"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.example.ltsdemo"
         minSdk = 24
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -43,8 +43,11 @@ dependencies {
     implementation("io.github.lts-sdk:lts-sdk-android:1.0.28")
 //    implementation(project(":lts-android-sdk"))
     implementation("com.google.code.gson:gson:2.8.9")
-    implementation("androidx.room:room-runtime:2.4.0")
-    implementation("androidx.room:room-common:2.4.0")
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.common)
+    implementation(libs.androidx.room.ktx)
+    // Note: Use kapt or ksp for room-compiler if needed, but since we are not defining DAOs in this app module, runtime is enough.
+    // If you add DAOs here, add: kapt(libs.androidx.room.compiler)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
